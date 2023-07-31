@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Execute SQL</title>
+    <script>
+    function sendSQL() {
+        const sqlQuery = document.getElementById('sqlQuery').value;
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://jason06.lan:3002/sql', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({ sql: sqlQuery }));
+
+        xhr.onload = function () {
+            if (xhr.status != 200) {
+                console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+            } else {
+                console.log("xhr.response:", xhr.response);
+
+                const result = JSON.parse(xhr.response);
+                console.log("Parsed Result:", result);
+                
+                const jsonResultDiv = document.getElementById('jsonResult');
+                jsonResultDiv.innerHTML = result;
+
+                const parsedResultDiv = document.getElementById('parsedResult');
+
+                const data = JSON.parse(result);
+                for (let i=0; i < data.length; i++) {
+                    const record = data[i];
+                    console.log("record:", record);
+
+                    const keys = Object.keys(record);
+
+                    for ( let j = 0; j < keys.length; j++) {
+                        const key = keys[j];
+                        parsedResultDiv.innerHTML += `${key}: ${record[key]}<br>`;
+                    }
+                    // parsedResultDiv.innerHTML += JSON.stringify(record, null, 0) + '<br>';    
+                    parsedResultDiv.innerHTML += '<br>'; 
+
+                }
+
+                // Create a table element 
+                const table = document.createElement('table');
+
+                // Add header row 
+                let headerRow = `<tr>`;
+                const keys = Object.keys(data[0]);
+                for (let i = 0; i < keys.length; i++) {
+                headerRow += `<th>${keys[i]}</th>`; 
+                }
+                headerRow += `</tr>`;
+                table.innerHTML += headerRow;
+
+                // Add data rows
+                for (let i = 0; i < data.length; i++) {
+                let row = `<tr>`;
+                for (let j = 0; j < keys.length; j++) {
+                    const key = keys[j];
+                    row += `<td>${data[i][key]}</td>`;
+                }
+                row += `</tr>`;
+                table.innerHTML += row; 
+                }
+
+                // Add table to page 
+                document.body.appendChild(table);
+            }
+        };
+
+        xhr.onerror = function () {
+            console.log("Request failed");
+        };
+    }
+</script>
+</head>
+<body>
+    <h1>Enter SQL query</h1>
+    <textarea id="sqlQuery" rows="10" cols="50"></textarea>
+    <button onclick="sendSQL()">Execute</button>
+    <br><br>
+    <div id="jsonResult"></div>
+    <hr>
+    <div id="parsedResult"></div>
+    <hr>
+    <div id="table"></div>
+</body>
+</html>
