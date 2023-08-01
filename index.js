@@ -1,13 +1,26 @@
-const { new_db, query, use_ns, use_db } = require('.');
+const surreal = require("./lib/index.node");
 
+class SurrealDB {
+    constructor(address) {
+        this.db = surreal.new_db(address);
+    }
 
-async function run() {
-    const db = await new_db(process.cwd() + "/database");
+    async ready() {
+        await this.db;
+    }
 
-    await use_ns(db, "test");
-    await use_db(db, "test");
+    async use(args) {
+        if (args.ns !== undefined) {
+            surreal.use_ns(await this.db, args.ns);
+        }
+        if (args.db !== undefined) {
+            surreal.use_db(await this.db, args.db);
+        }
+    }
 
-    let reply = await query(db, "UPDATE |test:100|");
-    console.log(reply);
+    async query(query) {
+        return await surreal.query(await this.db, query);
+    }
 }
-run();
+
+module.exports = SurrealDB;
