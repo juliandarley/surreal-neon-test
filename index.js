@@ -11,10 +11,10 @@ class SurrealDB {
 
     async use(args) {
         if (args.ns !== undefined) {
-            surreal.use_ns(await this.db, args.ns);
+            await surreal.use_ns(await this.db, args.ns);
         }
         if (args.db !== undefined) {
-            surreal.use_db(await this.db, args.db);
+            await surreal.use_db(await this.db, args.db);
         }
     }
 
